@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class ClientDataImportHandler extends AbstractDataImportHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ClientDataImportHandler.class);
@@ -108,10 +110,12 @@ public class ClientDataImportHandler extends AbstractDataImportHandler {
             try {
                 Gson gson = new Gson();
                 String payload = gson.toJson(client);
-                restClient.post("clients", payload);
+                String response = restClient.post("clients", payload);
+                JsonObject obj = new JsonParser().parse(response).getAsJsonObject();
+                String clientId = obj.get("resourceId").toString();
                 
                 Cell statusCell = clientSheet.getRow(client.getRowIndex()).createCell(STATUS_COL);
-                statusCell.setCellValue("Imported");
+                statusCell.setCellValue("Imported Client ID:"+clientId);
                 statusCell.setCellStyle(getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (RuntimeException e) {
             	String message = parseStatus(e.getMessage());
